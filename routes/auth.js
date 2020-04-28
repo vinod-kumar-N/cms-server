@@ -21,7 +21,7 @@ router.get("/getUsers", verifyToken, async (req, res) => {
 router.post("/register", async (req, res) => {
   const { error } = validateRegistration(req.body);
   if (error) {
-    return res.status(400).send(error.details);
+    return res.status(400).send(error.details[0]);
   }
   const emailExists = await registerSchema.findOne({ email: req.body.email });
   console.log(emailExists);

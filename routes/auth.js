@@ -30,10 +30,12 @@ router.post("/register", async (req, res) => {
 
   const salt = await bcrypt.genSalt(10);
   const hashPwd = await bcrypt.hash(req.body.password, salt);
+  const hashConfirmPwd = await bcrypt.hash(req.body.confirmpwd, salt);
   const userInfo = new registerSchema({
     name: req.body.name,
     userName: req.body.userName,
     password: hashPwd,
+    confirmpwd: hashConfirmPwd,
     email: req.body.email,
     designation: req.body.designation,
   });
@@ -47,7 +49,6 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { error } = validateLogin(req.body);
-  console.log(error);
   if (error) {
     return res.status(400).send(error.details);
   }

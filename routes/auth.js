@@ -47,17 +47,19 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { error } = validateLogin(req.body);
-  console.log(error);
   if (error) {
     return res.status(400).send(error.details);
   }
-  const user = await registerSchema.findOne({ email: req.body.email });
+  const user = await registerSchema.findOne({
+    email: req.body.email,
+  });
   if (!user) return res.status(400).send({ message: "Email  invalid" });
   const validPwd = await bcrypt.compare(req.body.password, user.password);
   if (!validPwd) return res.status(400).send({ message: "pwd is invalid" });
-
   const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
-  res.header("auth_token", token).send({ message: "Login Success!", token });
+  res
+    .header("auth_token", token)
+    .send({ message: "Login Success!", token, name: user.name });
 });
 
 module.exports = router;

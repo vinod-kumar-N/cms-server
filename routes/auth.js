@@ -21,7 +21,7 @@ router.get("/getUsers", verifyToken, async (req, res) => {
 router.post("/register", async (req, res) => {
   const { error } = validateRegistration(req.body);
   if (error) {
-    return res.status(400).send(error.details);
+    return res.status(400).send(error.details[0]);
   }
   const emailExists = await registerSchema.findOne({ email: req.body.email });
   console.log(emailExists);
@@ -30,10 +30,12 @@ router.post("/register", async (req, res) => {
 
   const salt = await bcrypt.genSalt(10);
   const hashPwd = await bcrypt.hash(req.body.password, salt);
+  const hashConfirmPwd = await bcrypt.hash(req.body.confirmpwd, salt);
   const userInfo = new registerSchema({
     name: req.body.name,
     userName: req.body.userName,
     password: hashPwd,
+    confirmpwd: hashConfirmPwd,
     email: req.body.email,
     designation: req.body.designation,
   });

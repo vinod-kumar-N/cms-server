@@ -3,16 +3,28 @@ const registerSchema = require("../models/register");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const verifyToken = require("./verifyToken");
+const jwt_decode = require("jwt-decode");
 //validation
 const {
   validateRegistration,
   validateLogin,
 } = require("../validation/validation");
 
+router.get("/getUser", verifyToken, async (req, res) => {
+  try {
+    const getUserId = await jwt_decode(req.header("auth_token"));
+    const user = await registerSchema.findOne({
+      _id: getUserId,
+    });
+    res.send({ name: user.name });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 router.get("/getUsers", verifyToken, async (req, res) => {
   try {
     const getData = await registerSchema.find();
-    console.log(getData);
   } catch (err) {
     res.json({ message: err });
   }
@@ -42,13 +54,11 @@ router.post("/register", async (req, res) => {
   try {
     const registerData = await userInfo.save();
     const token = jwt.sign({ _id: registerData._id }, process.env.TOKEN_SECRET);
-    res
-      .header("auth_token", token)
-      .send({
-        message: "Registration Success!",
-        token,
-        name: registerData.name,
-      });
+    res.header("auth_token", token).cookie("auth_token", token).send({
+      message: "Registration Success!",
+      token,
+      name: registerData.name,
+    });
   } catch (err) {
     res.json({ message: err });
   }
@@ -68,6 +78,7 @@ router.post("/login", async (req, res) => {
   const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
   res
     .header("auth_token", token)
+    .cookie("auth_token", token)
     .send({ message: "Login Success!", token, name: user.name });
 });
 

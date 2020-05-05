@@ -41,7 +41,14 @@ router.post("/register", async (req, res) => {
   });
   try {
     const registerData = await userInfo.save();
-    res.json(registerData);
+    const token = jwt.sign({ _id: registerData._id }, process.env.TOKEN_SECRET);
+    res
+      .header("auth_token", token)
+      .send({
+        message: "Registration Success!",
+        token,
+        name: registerData.name,
+      });
   } catch (err) {
     res.json({ message: err });
   }

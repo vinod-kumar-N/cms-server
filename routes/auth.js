@@ -75,7 +75,10 @@ router.post("/login", async (req, res) => {
   if (!user) return res.status(400).send({ message: "Email  invalid" });
   const validPwd = await bcrypt.compare(req.body.password, user.password);
   if (!validPwd) return res.status(400).send({ message: "pwd is invalid" });
-  const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
+  const token = jwt.sign(
+    { _id: user._id, exp: 900000 },
+    process.env.TOKEN_SECRET
+  );
   res
     .header("auth_token", token)
     .cookie("auth_token", token)
